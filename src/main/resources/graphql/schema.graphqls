@@ -1,0 +1,44 @@
+type Query{
+# Query for "CompteGeneral"
+    compteGeneralList:[CompteGeneral]
+    compteGeneralById(id:String):CompteGeneral
+    planComptableByCompteGeneralId(id:String):[PlanComptableElement]
+# Query for "PlanComptableElement"
+    planComptableElementList:[PlanComptableElement]
+    planComptableElementById(id:String):PlanComptableElement
+}
+type Mutation{
+# Mutation for "CompteGeneral"
+    ajouterCompteGeneral(compteGeneralDTO:CompteGeneralDTO):CompteGeneral
+    modifierCompteGeneral(compteGeneralDTO:CompteGeneralDTO,id:String):CompteGeneral
+    supprimerCompteGeneral(id:String):CompteGeneral
+# Mutation for "PlanComptableElement"
+    ajouterplanComptableElement(planComptableElementDTO:PlanComptableElementDTO):PlanComptableElement
+    modifierplanComptableElement(planComptableElementDTO:PlanComptableElementDTO,id:String):PlanComptableElement
+    supprimerplanComptableElement(id:String):PlanComptableElement
+}
+type CompteGeneral{
+    id :String,
+    natureCompte :String ,
+    debutFaurchette: String ,
+    finFaurchette :String
+}
+input CompteGeneralDTO{
+    natureCompte :String ,
+    debutFaurchette: String ,
+    finFaurchette :String
+}
+
+type PlanComptableElement{
+    id :String ,
+    numeroCompte: String ,
+    intitule: String ,
+    reporter: Boolean,
+    compteGeneral: CompteGeneral
+}
+input PlanComptableElementDTO{
+    numeroCompte: String ,
+    intitule: String ,
+    reporter: Boolean ,
+    compteGeneralId: String ,
+}
