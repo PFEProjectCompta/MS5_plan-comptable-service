@@ -12,4 +12,5 @@ public class PlanComptableElementDTO {
     private String intitule;
     private Boolean reporter;
     private String compteGeneralId;
+    private String societeId;
 }

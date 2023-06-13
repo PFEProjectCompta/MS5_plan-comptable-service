@@ -15,4 +15,5 @@ public class PlanComptableElement {
     private String intitule;
     private Boolean reporter;
     private CompteGeneral compteGeneral;
+    private String societeId;
 }

@@ -1,12 +1,15 @@
 package com.ges.plancomptableservice.config;
 
+import com.base.basemodel.dto.PlanComptableDTOKafka;
 import com.ges.plancomptableservice.entities.CompteGeneral;
 import com.ges.plancomptableservice.entities.PlanComptableElement;
 import com.ges.plancomptableservice.enums.NatureCompte;
+import com.ges.plancomptableservice.kafka.PlanComptableElementProducer;
 import com.ges.plancomptableservice.repository.CompteGeneralRepository;
 import com.ges.plancomptableservice.repository.PlanComptableElementRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,10 +19,12 @@ public class InitialData {
     private static CompteGeneralRepository compteGeneralRepository;
 
     private static PlanComptableElementRepository planComptableElementRepository;
+    private static PlanComptableElementProducer planComptableElementProducer;
 
-    public InitialData(CompteGeneralRepository compteGeneralRepository, PlanComptableElementRepository planComptableElementRepository) {
+    public InitialData(CompteGeneralRepository compteGeneralRepository, PlanComptableElementRepository planComptableElementRepository, PlanComptableElementProducer planComptableElementProducer) {
         this.compteGeneralRepository = compteGeneralRepository;
         this.planComptableElementRepository = planComptableElementRepository;
+        this.planComptableElementProducer = planComptableElementProducer;
     }
     public static void ajouterCompteGeneraux(){
         for(int i =0;i<5;i++){
@@ -47,5 +52,18 @@ public class InitialData {
                 System.out.println(planComptableElementRepository.save(planComptableElement));
             }
         });
+    }
+    public static void addToKafka(){
+        List<PlanComptableElement> planComptableElements=planComptableElementRepository.findAll();
+        for(int i=0;i<planComptableElements.size();i++){
+            PlanComptableDTOKafka planComptableDTOKafka=PlanComptableDTOKafka.builder()
+                    .id(planComptableElements.get(i).getId())
+                    .numeroCompte(planComptableElements.get(i).getNumeroCompte())
+                    .compteGeneralId(planComptableElements.get(i).getCompteGeneral().getId())
+                    .reporter(planComptableElements.get(i).getReporter())
+                    .intitule(planComptableElements.get(i).getIntitule())
+                    .build();
+            planComptableElementProducer.sendMessage(planComptableDTOKafka);
+        }
     }
 }

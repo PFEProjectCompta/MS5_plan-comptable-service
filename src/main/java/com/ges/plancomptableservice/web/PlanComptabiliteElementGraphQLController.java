@@ -4,6 +4,7 @@ import com.ges.plancomptableservice.dto.PlanComptableElementDTO;
 import com.ges.plancomptableservice.entities.PlanComptableElement;
 import com.ges.plancomptableservice.repository.CompteGeneralRepository;
 import com.ges.plancomptableservice.repository.PlanComptableElementRepository;
+import com.ges.plancomptableservice.service.PlanComptableKafkaService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -16,11 +17,13 @@ import java.util.UUID;
 public class PlanComptabiliteElementGraphQLController {
     private CompteGeneralRepository compteGeneralRepository;
     private PlanComptableElementRepository planComptableElementRepository;
+    private PlanComptableKafkaService planComptableKafkaService;
 
     public PlanComptabiliteElementGraphQLController(CompteGeneralRepository compteGeneralRepository,
-                                                    PlanComptableElementRepository planComptableElementRepository) {
+                                                    PlanComptableElementRepository planComptableElementRepository, PlanComptableKafkaService planComptableKafkaService) {
         this.compteGeneralRepository = compteGeneralRepository;
         this.planComptableElementRepository = planComptableElementRepository;
+        this.planComptableKafkaService = planComptableKafkaService;
     }
 
     @QueryMapping
@@ -39,8 +42,11 @@ public class PlanComptabiliteElementGraphQLController {
                 .numeroCompte("122300000")
                 .intitule("l'achat des marchandises")
                 .compteGeneral(compteGeneralRepository.findById(planComptableElementDTO.getCompteGeneralId()).get())
+                .societeId(planComptableElementDTO.getSocieteId())
                 .build();
-        return planComptableElementRepository.save(planComptableElement);
+        PlanComptableElement saved=planComptableElementRepository.save(planComptableElement);
+        planComptableKafkaService.sendMessagePlanComptable(saved);
+        return saved;
     }
     @MutationMapping
     public PlanComptableElement modifierplanComptableElement(@Argument PlanComptableElementDTO planComptableElementDTO ,
@@ -50,12 +56,16 @@ public class PlanComptabiliteElementGraphQLController {
         planComptableElement.setReporter(planComptableElementDTO.getReporter()==null? planComptableElement.getReporter():planComptableElementDTO.getReporter());
         planComptableElement.setNumeroCompte(planComptableElementDTO.getNumeroCompte()==null? planComptableElement.getNumeroCompte(): planComptableElementDTO.getNumeroCompte());
         planComptableElement.setCompteGeneral(planComptableElementDTO.getCompteGeneralId()==null?planComptableElement.getCompteGeneral():compteGeneralRepository.findById(planComptableElementDTO.getCompteGeneralId()).get());
-        return planComptableElementRepository.save(planComptableElement);
+        planComptableElement.setSocieteId(planComptableElementDTO.getSocieteId()==null?planComptableElement.getSocieteId():planComptableElementDTO.getSocieteId());
+        PlanComptableElement saved=planComptableElementRepository.save(planComptableElement);
+        planComptableKafkaService.sendMessagePlanComptable(saved);
+        return saved;
     }
     @MutationMapping
     public PlanComptableElement supprimerplanComptableElement(@Argument String id){
         PlanComptableElement planComptableElement=planComptableElementRepository.findById(id).get();
         planComptableElementRepository.delete(planComptableElement);
+        planComptableKafkaService.sendMessagePlanComptableDeleted(planComptableElement);
         return planComptableElement;
     }
 }
