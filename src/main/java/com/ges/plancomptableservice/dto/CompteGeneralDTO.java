@@ -11,4 +11,5 @@ public class CompteGeneralDTO {
     private NatureCompte natureCompte;
     private String debutFaurchette;
     private String finFaurchette;
+    private String idSociete;
 }

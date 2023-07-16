@@ -39,8 +39,8 @@ public class PlanComptabiliteElementGraphQLController {
         PlanComptableElement planComptableElement=PlanComptableElement.builder()
                 .id(UUID.randomUUID().toString())
                 .reporter(true)
-                .numeroCompte("122300000")
-                .intitule("l'achat des marchandises")
+                .numeroCompte(planComptableElementDTO.getNumeroCompte())
+                .intitule(planComptableElementDTO.getIntitule())
                 .compteGeneral(compteGeneralRepository.findById(planComptableElementDTO.getCompteGeneralId()).get())
                 .societeId(planComptableElementDTO.getSocieteId())
                 .build();
