@@ -6,6 +6,7 @@ type Query{
 # Query for "PlanComptableElement"
     planComptableElementList:[PlanComptableElement]
     planComptableElementById(id:String):PlanComptableElement
+    planComptableElementBySocieteId(id:String):[PlanComptableElement]
 # Query "Societe"
     allSocieteKafka:[SocieteDTOKafka]
 
@@ -16,12 +17,15 @@ type Mutation{
     ajouterCompteGeneral(compteGeneralDTO:CompteGeneralDTO):CompteGeneral
     modifierCompteGeneral(compteGeneralDTO:CompteGeneralDTO,id:String):CompteGeneral
     supprimerCompteGeneral(id:String):CompteGeneral
+    ajouterCompteGeneralAll(idSociete:String):[CompteGeneral]
 # Mutation for "PlanComptableElement"
     ajouterplanComptableElement(planComptableElementDTO:PlanComptableElementDTO):PlanComptableElement
     modifierplanComptableElement(planComptableElementDTO:PlanComptableElementDTO,id:String):PlanComptableElement
     supprimerplanComptableElement(id:String):PlanComptableElement
+    ajouterplanComptableElementSociete(planComptableElementSocieteDTO:PlanComptableElementSocieteDTO):PlanComptableElement
 
-    ajouterCompteGeneralAll(idSociete:String):[CompteGeneral]
+
+
 }
 type CompteGeneral{
     id :String,
@@ -52,7 +56,11 @@ input PlanComptableElementDTO{
     compteGeneralId: String ,
     societeId:String
 }
-
+input PlanComptableElementSocieteDTO{
+    numeroCompte: String ,
+    intitule: String ,
+    societeId:String
+}
 type SocieteDTOKafka{
     id :String ,
     raison_social: String ,
