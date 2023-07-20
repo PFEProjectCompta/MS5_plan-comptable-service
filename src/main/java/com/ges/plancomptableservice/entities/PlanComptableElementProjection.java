@@ -9,4 +9,6 @@ public interface PlanComptableElementProjection {
     public Boolean getReporter();
     public String getNumeroCompte();
     public CompteGeneral getCompteGeneral();
+    public String getSocieteId();
+
 }

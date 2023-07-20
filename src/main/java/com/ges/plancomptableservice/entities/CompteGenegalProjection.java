@@ -9,4 +9,5 @@ public interface CompteGenegalProjection {
     public NatureCompte getNatureCompte();
     public String getDebutFaurchette();
     public String getFinFaurchette();
+    public String getIdSociete();
 }

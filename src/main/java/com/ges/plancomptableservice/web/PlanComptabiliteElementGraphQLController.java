@@ -30,21 +30,22 @@ public class PlanComptabiliteElementGraphQLController {
     }
 
     @QueryMapping
-    public List<PlanComptableElement> planComptableElementList(){
+    public List<PlanComptableElement> planComptableElementList() {
         return planComptableElementRepository.findAll();
     }
+
     @QueryMapping
-    public PlanComptableElement planComptableElementById(@Argument String id){
+    public PlanComptableElement planComptableElementById(@Argument String id) {
         return planComptableElementRepository.findById(id).get();
     }
 
     @QueryMapping
-    public List<PlanComptableElement> planComptableElementBySocieteId(@Argument String id){
-        List<PlanComptableElement> planComptableElementList=planComptableElementRepository.findAll();
-        List<PlanComptableElement> planComptableElementsBySocieteId=new ArrayList<>();
-        for(int i=0;i<planComptableElementList.size();i++){
-            if(planComptableElementList.get(i).getSocieteId()!=null){
-                if(planComptableElementList.get(i).getSocieteId().equals(id)){
+    public List<PlanComptableElement> planComptableElementBySocieteId(@Argument String id) {
+        List<PlanComptableElement> planComptableElementList = planComptableElementRepository.findAll();
+        List<PlanComptableElement> planComptableElementsBySocieteId = new ArrayList<>();
+        for (int i = 0; i < planComptableElementList.size(); i++) {
+            if (planComptableElementList.get(i).getSocieteId() != null) {
+                if (planComptableElementList.get(i).getSocieteId().equals(id)) {
                     planComptableElementsBySocieteId.add(planComptableElementList.get(i));
                 }
             }
@@ -52,9 +53,10 @@ public class PlanComptabiliteElementGraphQLController {
         }
         return planComptableElementsBySocieteId;
     }
+
     @MutationMapping
-    public PlanComptableElement ajouterplanComptableElement(@Argument PlanComptableElementDTO planComptableElementDTO){
-        PlanComptableElement planComptableElement=PlanComptableElement.builder()
+    public PlanComptableElement ajouterplanComptableElement(@Argument PlanComptableElementDTO planComptableElementDTO) {
+        PlanComptableElement planComptableElement = PlanComptableElement.builder()
                 .id(UUID.randomUUID().toString())
                 .reporter(true)
                 .numeroCompte(planComptableElementDTO.getNumeroCompte())
@@ -62,46 +64,47 @@ public class PlanComptabiliteElementGraphQLController {
                 .compteGeneral(compteGeneralRepository.findById(planComptableElementDTO.getCompteGeneralId()).get())
                 .societeId(planComptableElementDTO.getSocieteId())
                 .build();
-        PlanComptableElement saved=planComptableElementRepository.save(planComptableElement);
+        PlanComptableElement saved = planComptableElementRepository.save(planComptableElement);
         planComptableKafkaService.sendMessagePlanComptable(saved);
         return saved;
     }
+
     @MutationMapping
-    public PlanComptableElement ajouterplanComptableElementSociete(@Argument PlanComptableElementSocieteDTO planComptableElementSocieteDTO){
-        List<CompteGeneral> compteGenerals=compteGeneralRepository.findAll();
-        List<CompteGeneral> compteGeneralListByIdSociete=new ArrayList<>();
-        CompteGeneral compteGeneral=new CompteGeneral();
-        for(int i=0;i<compteGenerals.size();i++){
-            if(compteGenerals.get(i).getIdSociete().equals(planComptableElementSocieteDTO.getSocieteId())){
+    public PlanComptableElement ajouterplanComptableElementSociete(@Argument PlanComptableElementSocieteDTO planComptableElementSocieteDTO) {
+        List<CompteGeneral> compteGenerals = compteGeneralRepository.findAll();
+        List<CompteGeneral> compteGeneralListByIdSociete = new ArrayList<>();
+        CompteGeneral compteGeneral = new CompteGeneral();
+        for (int i = 0; i < compteGenerals.size(); i++) {
+            if (compteGenerals.get(i).getIdSociete().equals(planComptableElementSocieteDTO.getSocieteId())) {
                 compteGeneralListByIdSociete.add(compteGenerals.get(i));
             }
         }
 
-        String[] s=planComptableElementSocieteDTO.getIntitule().split("\\s+");
-        for(int i=0;i<s.length;i++){
-            System.out.println("items : "+s[i]);
+        String[] s = planComptableElementSocieteDTO.getIntitule().split("\\s+");
+        for (int i = 0; i < s.length; i++) {
+            System.out.println("items : " + s[i]);
 
-            for(int j=0;j<compteGeneralListByIdSociete.size();j++){
-                if(compteGeneralListByIdSociete.get(j).getNatureCompte().toString().contains("_")){
-                    if(s[i].toLowerCase().indexOf(compteGeneralListByIdSociete.get(j).getNatureCompte().toString().split("_")[0].substring(0,4).toLowerCase())!=-1){
+            for (int j = 0; j < compteGeneralListByIdSociete.size(); j++) {
+                if (compteGeneralListByIdSociete.get(j).getNatureCompte().toString().contains("_")) {
+                    if (s[i].toLowerCase().indexOf(compteGeneralListByIdSociete.get(j).getNatureCompte().toString().split("_")[0].substring(0, 4).toLowerCase()) != -1) {
                         compteGeneral = compteGeneralListByIdSociete.get(j);
                         break;
-                    }else if(s[i].toLowerCase().indexOf(compteGeneralListByIdSociete.get(j).getNatureCompte().toString().split("_")[1].substring(0,4).toLowerCase())!=-1){
+                    } else if (s[i].toLowerCase().indexOf(compteGeneralListByIdSociete.get(j).getNatureCompte().toString().split("_")[1].substring(0, 4).toLowerCase()) != -1) {
                         compteGeneral = compteGeneralListByIdSociete.get(j);
                         break;
                     }
-                }else{
-                    if(s[i].toLowerCase().indexOf(compteGeneralListByIdSociete.get(j).getNatureCompte().toString().toLowerCase())!=-1){
+                } else {
+                    if (s[i].toLowerCase().indexOf(compteGeneralListByIdSociete.get(j).getNatureCompte().toString().toLowerCase()) != -1) {
                         compteGeneral = compteGeneralListByIdSociete.get(j);
                         break;
                     }
                 }
             }
-            if(compteGeneral.getId()!=null){
+            if (compteGeneral.getId() != null) {
                 break;
             }
         }
-        PlanComptableElement planComptableElement=PlanComptableElement.builder()
+        PlanComptableElement planComptableElement = PlanComptableElement.builder()
                 .id(UUID.randomUUID().toString())
                 .reporter(true)
                 .numeroCompte(planComptableElementSocieteDTO.getNumeroCompte())
@@ -109,26 +112,28 @@ public class PlanComptabiliteElementGraphQLController {
                 .compteGeneral(compteGeneral)
                 .societeId(planComptableElementSocieteDTO.getSocieteId())
                 .build();
-        PlanComptableElement saved=planComptableElementRepository.save(planComptableElement);
+        PlanComptableElement saved = planComptableElementRepository.save(planComptableElement);
         planComptableKafkaService.sendMessagePlanComptable(saved);
         return saved;
     }
+
     @MutationMapping
-    public PlanComptableElement modifierplanComptableElement(@Argument PlanComptableElementDTO planComptableElementDTO ,
-                                                             @Argument String id){
-        PlanComptableElement planComptableElement= planComptableElementRepository.findById(id).get();
-        planComptableElement.setIntitule(planComptableElementDTO.getIntitule()==null? planComptableElement.getIntitule() : planComptableElementDTO.getIntitule());
-        planComptableElement.setReporter(planComptableElementDTO.getReporter()==null? planComptableElement.getReporter():planComptableElementDTO.getReporter());
-        planComptableElement.setNumeroCompte(planComptableElementDTO.getNumeroCompte()==null? planComptableElement.getNumeroCompte(): planComptableElementDTO.getNumeroCompte());
-        planComptableElement.setCompteGeneral(planComptableElementDTO.getCompteGeneralId()==null?planComptableElement.getCompteGeneral():compteGeneralRepository.findById(planComptableElementDTO.getCompteGeneralId()).get());
-        planComptableElement.setSocieteId(planComptableElementDTO.getSocieteId()==null?planComptableElement.getSocieteId():planComptableElementDTO.getSocieteId());
-        PlanComptableElement saved=planComptableElementRepository.save(planComptableElement);
+    public PlanComptableElement modifierplanComptableElement(@Argument PlanComptableElementDTO planComptableElementDTO,
+                                                             @Argument String id) {
+        PlanComptableElement planComptableElement = planComptableElementRepository.findById(id).get();
+        planComptableElement.setIntitule(planComptableElementDTO.getIntitule() == null ? planComptableElement.getIntitule() : planComptableElementDTO.getIntitule());
+        planComptableElement.setReporter(planComptableElementDTO.getReporter() == null ? planComptableElement.getReporter() : planComptableElementDTO.getReporter());
+        planComptableElement.setNumeroCompte(planComptableElementDTO.getNumeroCompte() == null ? planComptableElement.getNumeroCompte() : planComptableElementDTO.getNumeroCompte());
+        planComptableElement.setCompteGeneral(planComptableElementDTO.getCompteGeneralId() == null ? planComptableElement.getCompteGeneral() : compteGeneralRepository.findById(planComptableElementDTO.getCompteGeneralId()).get());
+        planComptableElement.setSocieteId(planComptableElementDTO.getSocieteId() == null ? planComptableElement.getSocieteId() : planComptableElementDTO.getSocieteId());
+        PlanComptableElement saved = planComptableElementRepository.save(planComptableElement);
         planComptableKafkaService.sendMessagePlanComptable(saved);
         return saved;
     }
+
     @MutationMapping
-    public PlanComptableElement supprimerplanComptableElement(@Argument String id){
-        PlanComptableElement planComptableElement=planComptableElementRepository.findById(id).get();
+    public PlanComptableElement supprimerplanComptableElement(@Argument String id) {
+        PlanComptableElement planComptableElement = planComptableElementRepository.findById(id).get();
         planComptableElementRepository.delete(planComptableElement);
         planComptableKafkaService.sendMessagePlanComptableDeleted(planComptableElement);
         return planComptableElement;
